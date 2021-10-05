@@ -62,7 +62,7 @@ class WysiwygEditor extends Template implements RendererInterface
      * @param \Magento\Framework\Data\Form\Element\Factory           $factoryElement    
      * @param \Magento\Framework\Data\Form\Element\CollectionFactory $factoryCollection 
      * @param Escaper                                                $escaper           
-     * @param \Magento\Cms\Model\Wysiwyg\Config                      $wysiwygConfig     
+     * @param \Magento\Ui\Component\Wysiwyg\ConfigInterface                      $wysiwygConfig     
      * @param \Magento\Framework\View\LayoutInterface                $layout            
      * @param \Magento\Backend\Helper\Data                           $backendData       
      */
@@ -70,7 +70,7 @@ class WysiwygEditor extends Template implements RendererInterface
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Data\Form\Element\Factory $factoryElement,
         \Magento\Framework\Data\Form\Element\CollectionFactory $factoryCollection,
-        \Magento\Cms\Model\Wysiwyg\Config $wysiwygConfig,
+        \Magento\Ui\Component\Wysiwyg\ConfigInterface $wysiwygConfig,
         /*\Magento\Framework\View\LayoutInterface $layout,*/
         \Magento\Backend\Helper\Data $backendData
         ){
@@ -81,9 +81,17 @@ class WysiwygEditor extends Template implements RendererInterface
         $this->_wysiwygConfig = $wysiwygConfig;
         parent::__construct($context);
     }
-    public function isBase64Encoded($data) {
-        if(base64_encode($data) === $data) return false;
-        if(base64_encode(base64_decode($data)) === $data){
+
+    /**
+     * Check is based 64 encoded
+     * 
+     * @param string $data
+     * @return bool|int
+     */
+    public function isBase64Encoded($data) 
+    {
+        if (base64_encode($data) === $data) return false;
+        if (base64_encode(base64_decode($data)) === $data) {
             return true;
         }
         if (!preg_match('~[^0-9a-zA-Z+/=]~', $data)) {
@@ -101,7 +109,16 @@ class WysiwygEditor extends Template implements RendererInterface
 
         return false;
     }
-    public function render(AbstractElement $element){
+
+    /**
+     * Render
+     * 
+     * @param AbstractElement $element
+     * @return string
+     * 
+     */
+    public function render(AbstractElement $element)
+    {
 
         $html = '';
         $config = $this->_wysiwygConfig->getConfig();
@@ -110,25 +127,34 @@ class WysiwygEditor extends Template implements RendererInterface
         $this->element_id = $element_id;
 
         
-        
         $settings = $config->getData('settings');
         $settings['menubar'] = true;
-        $settings['toolbar'] = 'undo redo | styleselect | fontsizeselect | forecolor backcolor | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table | image | code';
-        $settings['plugins'] = 'textcolor image code';
-        $settings['theme_advanced_buttons1'] ='bold,italic,|,justifyleft,justifycenter,justifyright,justifyfull|,fontselect,fontsizeselect,|,forecolor,backcolor,|,link,unlink,image,|,bullist,numlist,|,code';
+        $settings['image_advtab'] = true;
+        $settings['plugins'] = 'advlist autolink code colorpicker directionality hr imagetools link media noneditable paste print table textcolor toc visualchars anchor charmap codesample contextmenu help image insertdatetime lists nonbreaking pagebreak preview searchreplace template textpattern visualblocks wordcount magentovariable';
+
+        $settings['toolbar1'] = 'magentovariable | formatselect | styleselect | fontsizeselect | forecolor backcolor | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent';
+        $settings['toolbar2'] = ' undo redo  | link anchor table charmap | image media insertdatetime | widget | searchreplace visualblocks  help | hr pagebreak';
+        $settings['force_p_newlines'] = false;
+
+        $settings['valid_children'] = '+body[style]';
+
+        //$settings['toolbar'] = 'undo redo | styleselect | fontsizeselect | forecolor backcolor | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table | image | code';
+        //$settings['plugins'] = 'textcolor image code';
+        //$settings['theme_advanced_buttons1'] ='bold,italic,|,justifyleft,justifycenter,justifyright,justifyfull|,fontselect,fontsizeselect,|,forecolor,backcolor,|,link,unlink,image,|,bullist,numlist,|,code';
+
         $config['height'] = '300px';
         $config->setData("settings", $settings);
         $config = json_encode($config->getData());
         $value = $element->getValue();
-        if(!is_array($value)){
+        if (!is_array($value)) {
             $value2 = str_replace(" ","+", $value);
-            if($this->isBase64Encoded($value2)){
+            if ($this->isBase64Encoded($value2)) {
                 $value = base64_decode($value2);
                 
-                if($this->isBase64Encoded($value)){
+                if ($this->isBase64Encoded($value)) {
                     $value = base64_decode($value);
                 }
-            }elseif(base64_encode(base64_decode($value)) === $value){
+            } elseif(base64_encode(base64_decode($value)) === $value) {
                 $value = base64_decode($value);
             }
         }
@@ -136,7 +162,7 @@ class WysiwygEditor extends Template implements RendererInterface
         #return $value;
 
         $class = '';
-        if($element->getRequired()){
+        if ($element->getRequired()) {
             $class = 'required-entry';
         }
 
@@ -177,15 +203,15 @@ class WysiwygEditor extends Template implements RendererInterface
             var config = $config,
                 editor;
 
-            jQuery.extend(config, {
-                settings: {
+            //jQuery.extend(config, {
+            //    settings: {
                     //theme_advanced_buttons1: 'bold,italic,|,justifyleft,justifycenter,justifyright,justifyfull|,' +
             //'fontselect,fontsizeselect,|,forecolor,backcolor,|,link,unlink,image,|,bullist,numlist,|,code',
-                    theme_advanced_buttons2: null,
-                    theme_advanced_buttons3: null,
-                    theme_advanced_buttons4: null
-                }
-            });
+            //        theme_advanced_buttons2: null,
+            //        theme_advanced_buttons3: null,
+            //        theme_advanced_buttons4: null
+            //    }
+            //});
 
             editor{$element_id} = new wysiwygSetup(
                 '{$element_id}',
@@ -271,7 +297,8 @@ HTML;
         return (string)new \Magento\Framework\Phrase($string);
     }
 
-    public function getHtmlId(){
+    public function getHtmlId()
+    {
         return $this->element_id;
     }
 
