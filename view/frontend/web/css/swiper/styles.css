@@ -232,3 +232,7 @@
 .widget-swiper .slider.banners{
     margin-top: -25px;
 }
+.ves-widget.widget-swiper {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
