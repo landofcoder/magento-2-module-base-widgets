@@ -25,6 +25,7 @@ class Reader extends \Magento\Widget\Model\Config\Reader
      * @param string $folderWidget
      */
     public function __construct(
+        \Magento\Framework\Module\Dir\Reader $moduleReader,
         \Magento\Framework\Config\FileResolverInterface $fileResolver,
         \Magento\Widget\Model\Config\Converter $converter,
         \Magento\Framework\Config\SchemaLocatorInterface $schemaLocator,
@@ -33,14 +34,8 @@ class Reader extends \Magento\Widget\Model\Config\Reader
         $idAttributes = [],
         $domDocumentClass = \Magento\Framework\Config\Dom::class,
         $defaultScope = 'global',
-        \Magento\Framework\Module\Dir\Reader $moduleReader,
         $folderWidget = 'widgets'
-
     ) {
-        $etcDir = $moduleReader->getModuleDir(\Magento\Framework\Module\Dir::MODULE_ETC_DIR, 'Ves_BaseWidget');
-        $this->_ves_widgets_folder = $folderWidget;
-        $this->_ves_widgets_path = $etcDir."/".$folderWidget."/";
-        $this->_ves_widgets = $this->getFilesInFolder( $this->_ves_widgets_path );
         parent::__construct(
             $fileResolver,
             $converter,
@@ -51,6 +46,10 @@ class Reader extends \Magento\Widget\Model\Config\Reader
             $domDocumentClass,
             $defaultScope
         );
+        $etcDir = $moduleReader->getModuleDir(\Magento\Framework\Module\Dir::MODULE_ETC_DIR, 'Ves_BaseWidget');
+        $this->_ves_widgets_folder = $folderWidget;
+        $this->_ves_widgets_path = $etcDir."/".$folderWidget."/";
+        $this->_ves_widgets = $this->getFilesInFolder( $this->_ves_widgets_path );
     }
     public function getWidgetsPath() {
         return $this->_ves_widgets_path;
@@ -67,7 +66,7 @@ class Reader extends \Magento\Widget\Model\Config\Reader
             $file_ext = ".xml";
 
             $dirs = glob( $folder.'*'.$file_ext );
-            if($dirs) { //load 
+            if($dirs) { //load
                 foreach($dirs as $dir) {
                     $file_name = basename( $dir );
                     $result[] = $file_name;
@@ -99,6 +98,6 @@ class Reader extends \Magento\Widget\Model\Config\Reader
             }
         }
         return $output;
-        
+
     }
 }
